@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { LLMConfig, LLMProvider } from '@/lib/types';
 import { X, Key, Cpu, ShieldCheck } from 'lucide-react';
 
@@ -28,12 +28,25 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [provider, setProvider] = React.useState<LLMProvider>(config.provider);
   const [model, setModel] = React.useState<string>(config.model);
   const [apiKey, setApiKey] = React.useState<string>(config.apiKey || '');
+  const dialogRef = useRef<HTMLDivElement>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setProvider(config.provider);
     setModel(config.model);
     setApiKey(config.apiKey || '');
   }, [config, isOpen]);
+
+  // Handle Escape key to close dialog
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   const handleProviderChange = (newProvider: LLMProvider) => {
     setProvider(newProvider);
@@ -52,29 +65,44 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-slate-800 rounded-xl w-full max-w-md overflow-hidden shadow-2xl">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="settings-modal-title"
+      className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+    >
+      <div
+        ref={dialogRef}
+        className="bg-slate-900 border border-slate-800 rounded-xl w-full max-w-md overflow-hidden shadow-2xl focus:outline-none"
+        tabIndex={-1}
+      >
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
           <div className="flex items-center gap-2">
-            <Cpu className="w-4 h-4 text-blue-400" />
-            <h3 className="font-semibold text-slate-100 text-sm">Model & API Configuration</h3>
+            <Cpu className="w-4 h-4 text-blue-400" aria-hidden="true" />
+            <h2 id="settings-modal-title" className="font-semibold text-slate-100 text-sm">
+              Model & API Configuration
+            </h2>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-200 p-1 rounded-md transition"
+            aria-label="Close settings dialog"
+            className="text-slate-400 hover:text-slate-200 p-1 rounded-md transition focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
           >
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
 
         <div className="p-5 space-y-4 text-xs">
           {/* Provider Selection */}
           <div>
-            <label className="block text-slate-300 font-medium mb-1.5">LLM Provider</label>
+            <label htmlFor="settings-provider" className="block text-slate-200 font-medium mb-1.5">
+              LLM Provider
+            </label>
             <select
+              id="settings-provider"
               value={provider}
               onChange={(e) => handleProviderChange(e.target.value as LLMProvider)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-blue-500"
+              className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus:outline-none"
             >
               <option value="gemini">Google Gemini (Recommended - Fast & High Quota)</option>
               <option value="anthropic">Anthropic (Claude 3.5 Sonnet)</option>
@@ -86,11 +114,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
           {/* Model Selection */}
           <div>
-            <label className="block text-slate-300 font-medium mb-1.5">Model</label>
+            <label htmlFor="settings-model" className="block text-slate-200 font-medium mb-1.5">
+              Model
+            </label>
             <select
+              id="settings-model"
               value={model}
               onChange={(e) => setModel(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-blue-500 font-mono"
+              className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 font-mono focus-visible:ring-2 focus-visible:ring-blue-500 focus:outline-none"
             >
               {PROVIDER_MODELS[provider].map((m) => (
                 <option key={m} value={m}>
@@ -103,41 +134,47 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* API Key */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-slate-300 font-medium flex items-center gap-1.5">
-                <Key className="w-3.5 h-3.5 text-amber-400" />
+              <label htmlFor="settings-apikey" className="text-slate-200 font-medium flex items-center gap-1.5">
+                <Key className="w-3.5 h-3.5 text-amber-400" aria-hidden="true" />
                 <span>API Key</span>
               </label>
-              <span className="text-[10px] text-slate-500">Stored in browser</span>
+              <span className="text-[10px] text-slate-400">Stored in browser</span>
             </div>
             <input
+              id="settings-apikey"
               type="password"
               placeholder={`Enter ${provider.toUpperCase()}_API_KEY or leave blank if set in Vercel`}
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-blue-500 font-mono"
+              className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 font-mono focus-visible:ring-2 focus-visible:ring-blue-500 focus:outline-none"
             />
           </div>
 
-          <div className="p-3 rounded-lg bg-blue-950/30 border border-blue-900/50 flex items-start gap-2 text-slate-300 text-[11px] leading-relaxed">
-            <ShieldCheck className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
+          <div
+            role="note"
+            className="p-3 rounded-lg bg-blue-950/40 border border-blue-900/60 flex items-start gap-2 text-slate-300 text-[11px] leading-relaxed"
+          >
+            <ShieldCheck className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
             <div>
               When deployed on Vercel, you can also securely set{' '}
-              <code className="text-blue-300">GEMINI_API_KEY</code>,{' '}
-              <code className="text-blue-300">OPENAI_API_KEY</code>, etc., directly in your Vercel Project Environment Variables.
+              <code className="text-blue-300 font-mono">GEMINI_API_KEY</code>,{' '}
+              <code className="text-blue-300 font-mono">OPENAI_API_KEY</code>, etc., directly in your Vercel Project Environment Variables.
             </div>
           </div>
         </div>
 
         <div className="px-5 py-3 bg-slate-950 border-t border-slate-800 flex justify-end gap-2 text-xs">
           <button
+            type="button"
             onClick={onClose}
-            className="px-3 py-1.5 rounded-lg border border-slate-700 text-slate-300 hover:bg-slate-800 transition"
+            className="px-3 py-1.5 rounded-lg border border-slate-700 text-slate-300 hover:bg-slate-800 transition focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
           >
             Cancel
           </button>
           <button
+            type="button"
             onClick={handleSave}
-            className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition"
+            className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none"
           >
             Save Configuration
           </button>

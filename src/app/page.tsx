@@ -80,7 +80,7 @@ export default function Home() {
     setMessages((prev) => [...prev, userMsg]);
     setAgentState('starting');
 
-    // Switch right panel to logs or code automatically
+    // Default right panel to code view
     setRightPanelTab('code');
 
     try {
@@ -126,7 +126,6 @@ export default function Home() {
                 setFiles(event.files);
               } else if (event.type === 'report' && event.report) {
                 setReport(event.report);
-                // Also post an assistant message with completion summary
                 setMessages((prev) => [
                   ...prev,
                   {
@@ -183,47 +182,51 @@ export default function Home() {
       />
 
       {/* Main Workspace */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <main id="main-content" className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Top Agent Stepper */}
         <AgentStepper state={agentState} />
 
         {/* Center Grid Workspace */}
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-3 p-3 overflow-hidden">
           {/* Chat Interface Column (5 cols on lg) */}
-          <section className="lg:col-span-5 h-full overflow-hidden">
+          <div className="lg:col-span-5 h-full overflow-hidden">
             <ChatInterface
               messages={messages}
               state={agentState}
               onSendMessage={handleSendMessage}
             />
-          </section>
+          </div>
 
           {/* Right Workspace Column (7 cols on lg) */}
-          <section className="lg:col-span-7 h-full flex flex-col overflow-hidden">
+          <div className="lg:col-span-7 h-full flex flex-col overflow-hidden">
             {/* View switcher between Code & Terminal */}
             <div className="flex items-center justify-between pb-2">
-              <div className="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-lg p-0.5 text-xs">
+              <nav aria-label="Workspace views" className="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-lg p-0.5 text-xs">
                 <button
+                  type="button"
+                  aria-pressed={rightPanelTab === 'code'}
                   onClick={() => setRightPanelTab('code')}
-                  className={`px-3 py-1 rounded-md font-medium transition ${
+                  className={`px-3 py-1 rounded-md font-medium transition focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none ${
                     rightPanelTab === 'code'
                       ? 'bg-blue-600 text-white shadow-sm'
-                      : 'text-slate-400 hover:text-slate-200'
+                      : 'text-slate-300 hover:text-white'
                   }`}
                 >
                   Code & Workspace
                 </button>
                 <button
+                  type="button"
+                  aria-pressed={rightPanelTab === 'logs'}
                   onClick={() => setRightPanelTab('logs')}
-                  className={`px-3 py-1 rounded-md font-medium transition ${
+                  className={`px-3 py-1 rounded-md font-medium transition focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none ${
                     rightPanelTab === 'logs'
                       ? 'bg-blue-600 text-white shadow-sm'
-                      : 'text-slate-400 hover:text-slate-200'
+                      : 'text-slate-300 hover:text-white'
                   }`}
                 >
                   Terminal Logs ({logs.length})
                 </button>
-              </div>
+              </nav>
             </div>
 
             <div className="flex-1 overflow-hidden">
@@ -233,7 +236,7 @@ export default function Home() {
                 <TerminalLogs logs={logs} onClear={() => setLogs([])} />
               )}
             </div>
-          </section>
+          </div>
         </div>
       </main>
 

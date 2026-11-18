@@ -19,19 +19,19 @@ export const TerminalLogs: React.FC<TerminalLogsProps> = ({ logs, onClear }) => 
   const getSenderBadge = (sender: string) => {
     switch (sender) {
       case 'planner':
-        return 'bg-purple-950/80 text-purple-300 border-purple-800';
+        return 'bg-purple-950 text-purple-200 border-purple-700';
       case 'researcher':
-        return 'bg-cyan-950/80 text-cyan-300 border-cyan-800';
+        return 'bg-cyan-950 text-cyan-200 border-cyan-700';
       case 'coder':
-        return 'bg-amber-950/80 text-amber-300 border-amber-800';
+        return 'bg-amber-950 text-amber-200 border-amber-700';
       case 'patcher':
-        return 'bg-indigo-950/80 text-indigo-300 border-indigo-800';
+        return 'bg-indigo-950 text-indigo-200 border-indigo-700';
       case 'runner':
-        return 'bg-sky-950/80 text-sky-300 border-sky-800';
+        return 'bg-sky-950 text-sky-200 border-sky-700';
       case 'reporter':
-        return 'bg-emerald-950/80 text-emerald-300 border-emerald-800';
+        return 'bg-emerald-950 text-emerald-200 border-emerald-700';
       default:
-        return 'bg-slate-800 text-slate-300 border-slate-700';
+        return 'bg-slate-800 text-slate-200 border-slate-600';
     }
   };
 
@@ -40,44 +40,53 @@ export const TerminalLogs: React.FC<TerminalLogsProps> = ({ logs, onClear }) => 
       case 'success':
         return 'text-emerald-300';
       case 'warn':
-        return 'text-amber-300';
+        return 'text-amber-300 font-medium';
       case 'error':
-        return 'text-rose-400';
+        return 'text-rose-300 font-medium';
       default:
-        return 'text-slate-300';
+        return 'text-slate-200';
     }
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-950 border border-slate-800 rounded-lg overflow-hidden font-mono text-xs">
+    <section
+      role="region"
+      aria-label="Agent Execution Console"
+      className="flex flex-col h-full bg-slate-950 border border-slate-800 rounded-lg overflow-hidden font-mono text-xs"
+    >
       <div className="flex items-center justify-between px-3 py-2 bg-slate-900 border-b border-slate-800">
-        <div className="flex items-center gap-2 text-slate-300 font-sans font-medium text-xs">
-          <Terminal className="w-3.5 h-3.5 text-blue-400" />
+        <div className="flex items-center gap-2 text-slate-200 font-sans font-medium text-xs">
+          <Terminal className="w-3.5 h-3.5 text-blue-400" aria-hidden="true" />
           <span>Agent Execution Console</span>
-          <span className="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">
+          <span className="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded border border-slate-700">
             {logs.length} events
           </span>
         </div>
         {onClear && (
           <button
             onClick={onClear}
-            className="p-1 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded transition"
+            aria-label="Clear execution console logs"
+            className="p-1 text-slate-400 hover:text-slate-100 hover:bg-slate-800 rounded transition focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
             title="Clear logs"
           >
-            <Trash2 className="w-3.5 h-3.5" />
+            <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
           </button>
         )}
       </div>
 
-      <div className="flex-1 p-3 overflow-y-auto space-y-1.5 selection:bg-slate-800">
+      <div
+        role="log"
+        aria-live="polite"
+        className="flex-1 p-3 overflow-y-auto space-y-1.5 selection:bg-slate-800"
+      >
         {logs.length === 0 ? (
-          <div className="text-slate-600 italic py-8 text-center font-sans">
+          <div className="text-slate-400 italic py-8 text-center font-sans">
             Awaiting task instruction...
           </div>
         ) : (
           logs.map((log) => (
             <div key={log.id} className="flex items-start gap-2 leading-relaxed">
-              <span className="text-slate-600 select-none text-[10px] pt-0.5">
+              <span className="text-slate-400 select-none text-[10px] pt-0.5" aria-hidden="true">
                 [{log.timestamp}]
               </span>
               <span
@@ -95,6 +104,6 @@ export const TerminalLogs: React.FC<TerminalLogsProps> = ({ logs, onClear }) => 
         )}
         <div ref={bottomRef} />
       </div>
-    </div>
+    </section>
   );
 };
