@@ -1,0 +1,12 @@
+[models]
+default = "gemini-2.5-flash"
+
+[api_keys]
+GEMINI_API_KEY = ""
+OPENAI_API_KEY = ""
+ANTHROPIC_API_KEY = ""
+GROQ_API_KEY = ""
+
+[server]
+host = "127.0.0.1"
+port = 1337
